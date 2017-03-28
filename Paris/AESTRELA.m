@@ -25,9 +25,9 @@
 function [retval] = AESTRELA (origem, destino, tamanho)
   
   #leitura dos grafo
-  grafo = fopen("paris0.txt", "r");
+  grafo = fopen("graph.txt", "r");
   #leitura das distancias
-  distancias = fopen("paris1.txt", "r");
+  distancias = fopen("distance.txt", "r");
   
   #verificando a abertura dos arquivos
   if (~grafo) || (~distancias)
@@ -86,7 +86,7 @@ function [retval] = AESTRELA (origem, destino, tamanho)
     endwhile
     
     if(length(valores) == 0)
-      printf("nao ha caminho possivel");
+      printf("Nao ha nenhum caminho possivel.\n");
       break;
     endif
     
