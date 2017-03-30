@@ -28,6 +28,13 @@ function [retval] = AESTRELA (origem, destino, tamanho)
   grafo = fopen("graph.txt", "r");
   #leitura das distancias
   distancias = fopen("distance.txt", "r");
+  #leitura das linhas
+  linhas = fopen("bucketing.txt", "r");
+  
+  #Blue - 1
+  #Yellow - 2
+  #Red - 3
+  #Green - 4
   
   #verificando a abertura dos arquivos
   if (~grafo) || (~distancias)
@@ -37,6 +44,7 @@ function [retval] = AESTRELA (origem, destino, tamanho)
   #recebendo os dados
   G = fscanf(grafo,"%f",[tamanho tamanho]);
   D = fscanf(distancias,"%f",[tamanho tamanho]);
+  L = fscanf(linhas, "%f", [tamanho tamanho]);
   
   #Converter de comprimento para tempo
   D = (D / 30) * 60;
@@ -80,7 +88,7 @@ function [retval] = AESTRELA (origem, destino, tamanho)
     valores = [];
     cont = 1;
     while(cont <= length(estacoesAtuais))
-      valor = D(atual,estacoesAtuais(cont)) + acumulado+ D(destino,estacoesAtuais(cont));
+      valor = D(atual,estacoesAtuais(cont)) + acumulado + D(destino,estacoesAtuais(cont));
       valores = [valores, valor];
       cont = (cont+1);
     endwhile
@@ -108,13 +116,28 @@ function [retval] = AESTRELA (origem, destino, tamanho)
     acumulado = acumulado + D(atual,menorIndice);
     atual = menorIndice;
     caminho = [caminho, atual];
-    
+
     if(atual == destino)
       gasto = 0;
       break;
     endif
     
   endwhile
+  
+  #calcular custo da baldeacao
+  baldeacao = 0;
+  if(columns(caminho) > 2)
+     linha = L(caminho(1), caminho(2));
+     for i = 2:(columns(caminho) - 1)
+        if(L(caminho(i), caminho(i + 1)) != linha)
+            #printf("Linha %d para %d\n", linha, L(caminho(i), caminho(i + 1)));
+            baldeacao = baldeacao + 4;
+            linha = L(caminho(i), caminho(i + 1));
+        endif
+     endfor
+  endif
+  
+  
   printf("Caminho com o menor custo de tempo:\n");
   for i = 1:(columns(caminho) - 1)
     printf("E%d -> ", caminho(i));
@@ -125,9 +148,10 @@ function [retval] = AESTRELA (origem, destino, tamanho)
   for i = 2:columns(caminho)
     total = total + D(caminho(i - 1), caminho(i));
   endfor
+  
   printf("Tempo gasto dentro do metro: %d minutos\n", total);
-  printf("Tempo gasto em baldeacao: %d minutos\n", 4*(columns(caminho) - 2));
-  total = total + 4*(columns(caminho) - 2);
+  printf("Tempo gasto em baldeacao: %d minutos\n", baldeacao);
+  total = total + baldeacao;
   printf("Custo total: %d minutos\n", total);
 
 endfunction
